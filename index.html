@@ -31,8 +31,8 @@ p{margin:0}
 @keyframes float{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-14px) rotate(14deg)}}
 .start{font-family:var(--display);font-weight:600;font-size:18px;color:var(--grape-dark);background:var(--cream);border-radius:999px;padding:12px 26px;text-decoration:none;box-shadow:0 5px 0 var(--crust)}
 main{padding:0 max(20px,env(safe-area-inset-right,0px)) 0 max(20px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;align-items:center}
-.drip{width:8px;height:56px;background:var(--grape);border-radius:0 0 6px 6px;position:relative}
-.drip::after{content:"";position:absolute;left:50%;bottom:-12px;width:16px;height:18px;transform:translateX(-50%);background:var(--grape);border-radius:50% 50% 50% 50%/40% 40% 60% 60%}
+/* Jelly drip between sections: flares out of the edge above, runs down, lands and pools on the next card's top edge (pool sits up on it, like the button drips). */
+.drip{width:44px;height:74px;margin:-4px 0 -14px;position:relative;z-index:2;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='74' viewBox='0 0 44 74'%3E%3Cpath d='M5 0C14 0 17 3 17.5 11C18 30 16.8 48 17.5 59C17.6 63.5 13 64 9 65.6C3.5 67.5 3.5 72.4 10 72.6L34 72.6C40.5 72.4 40.5 67.5 35 65.6C31 64 26.4 63.5 26.5 59C27.2 48 26 30 26.5 11C27 3 30 0 39 0Z' fill='%236B2FA0'/%3E%3Cpath d='M20.6 14L20.6 44' stroke='%23fff' stroke-opacity='.3' stroke-width='2' stroke-linecap='round'/%3E%3Cellipse cx='15' cy='67.4' rx='3.4' ry='1.1' fill='%23fff' fill-opacity='.35'/%3E%3C/svg%3E") no-repeat center/44px 74px}
 .card{width:100%;max-width:560px;background:var(--cream);border:5px solid var(--crust);border-radius:34px 34px 26px 26px;box-shadow:0 0 0 4px var(--rim),0 14px 30px rgba(59,42,26,.18);padding:26px 22px 22px;display:flex;flex-direction:column;gap:14px;scroll-margin-top:76px;margin-top:14px}
 .eyebrow{font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--grape)}
 .hint{font-size:15px;color:var(--ink-soft);text-align:center} .hint b{color:var(--grape)}

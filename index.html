@@ -1,3 +1,7 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>PBgif Brand Tour</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
@@ -7,7 +11,7 @@
 --display:Fredoka,ui-rounded,system-ui,sans-serif;--body:ui-rounded,'SF Pro Rounded',Nunito,system-ui,sans-serif;--meme:Anton,Impact,'Arial Narrow',sans-serif;color-scheme:light}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html,body{overflow-x:clip}
+html,body{overflow-x:clip;margin:0}
 #mbtn.pf{margin-bottom:0}
 body{background:var(--lav-light);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='52' height='52'%3E%3Crect width='52' height='52' fill='%23FFFFFF'/%3E%3Crect width='26' height='52' fill='%23EEE2F8'/%3E%3Crect width='52' height='26' fill='%23EEE2F8'/%3E%3Crect width='26' height='26' fill='%23D3B6ED'/%3E%3C/svg%3E");background-size:44px 44px;color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--cream)}
@@ -26,7 +30,7 @@ p{margin:0}
 .crumb{position:absolute;border-radius:40% 55% 45% 50%;opacity:.9;animation:float 9s ease-in-out infinite}
 @keyframes float{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-14px) rotate(14deg)}}
 .start{font-family:var(--display);font-weight:600;font-size:18px;color:var(--grape-dark);background:var(--cream);border-radius:999px;padding:12px 26px;text-decoration:none;box-shadow:0 5px 0 var(--crust)}
-main{padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;align-items:center}
+main{padding:0 max(20px,env(safe-area-inset-right,0px)) 0 max(20px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;align-items:center}
 .drip{width:8px;height:56px;background:var(--grape);border-radius:0 0 6px 6px;position:relative}
 .drip::after{content:"";position:absolute;left:50%;bottom:-12px;width:16px;height:18px;transform:translateX(-50%);background:var(--grape);border-radius:50% 50% 50% 50%/40% 40% 60% 60%}
 .card{width:100%;max-width:560px;background:var(--cream);border:5px solid var(--crust);border-radius:34px 34px 26px 26px;box-shadow:0 0 0 4px var(--rim),0 14px 30px rgba(59,42,26,.18);padding:26px 22px 22px;display:flex;flex-direction:column;gap:14px;scroll-margin-top:76px;margin-top:14px}

@@ -150,6 +150,9 @@ var EGG_LOGO={"crust":"M301.5,1651 C260.5,1650.1,243,1647.8,223.3,1640.9 C188.4,
   function audio() {
     if (!ac) {
       var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      // iPhone: Web Audio is muted when the ringer switch is on silent. 'playback' makes it play like a video does
+      // (that's why Pattern Pirate's sound, a plain audio file, plays on silent).
+      try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (x) {}
       ac = new AC();
       ['hum', 'ding', 'munch'].forEach(function (n) {
         fetch('egg/' + n + (n === 'hum' ? '.m4a' : '.mp3')).then(function (r) { return r.arrayBuffer(); })

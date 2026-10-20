@@ -489,4 +489,4 @@ $$('.start,.play,.next,#mbtn,.tb').forEach(function(el){var p=(el.classList.cont
 (function(){var cur='intro';seg('#mseg',function(b){cur=b.dataset.m;$$('[data-mv]').forEach(function(v){v.hidden=v.dataset.mv!==cur;});});
 $('#play').addEventListener('click',function(){var el=$(cur==='intro'?'#ph-intro':'#ph-mc');el.getAnimations({subtree:true}).forEach(function(a){a.currentTime=0;});});})();
 </script>
-<script src="egg/egg.js" defer></script>
+<script src="egg/egg.js?v=3" defer></script>

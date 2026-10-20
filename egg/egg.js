@@ -238,11 +238,41 @@ var EGG_LOGO={"crust":"M301.5,1651 C260.5,1650.1,243,1647.8,223.3,1640.9 C188.4,
       else if (Math.abs(x) >= 1.5 * Math.abs(y)) sw = x < 0 ? 'left' : 'right';
     }
     if (!sw) { swipes = []; return; }   // a tap or a slanted drag starts it over
+    addSwipe(sw, now);
+  }
+  function addSwipe(sw, now) {
     if (swipes.length && now - swipes[swipes.length - 1][1] > 1.5) swipes = [];
     swipes.push([sw, now]); if (swipes.length > CODE.length) swipes.shift();
     if (swipes.map(function (s) { return s[0]; }).join() === CODE.join()) { swipes = []; touch = null; startEgg(); }
   }
   hit.addEventListener('pointerup', lifted);
+  // Two-finger swipes on a trackpad, only with the pointer on the slice (there the page doesn't scroll).
+  // One swipe = one burst of scrolling; the glide after the fingers lift fades out, so a new push or a pause starts the next swipe.
+  var wheel = null;
+  hit.addEventListener('wheel', function (e) {
+    if (e.cancelable) e.preventDefault();
+    if (playing !== null) return;
+    var k = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1, dx = e.deltaX * k, dy = e.deltaY * k;
+    if (e.webkitDirectionInvertedFromDevice === false) { dx = -dx; dy = -dy; }   // Safari with natural scrolling off
+    var now = performance.now() / 1000, m = Math.hypot(dx, dy);
+    var turned = wheel && wheel.done && m > 3 && (dx * wheel.x + dy * wheel.y) / ((Math.hypot(wheel.x, wheel.y) || 1) * m) < 0.5;
+    if (!wheel || now - wheel.last > 0.2 || turned || (wheel.done && m > wheel.low * 2 + 6)) wheel = { x: 0, y: 0, done: false, low: 0, last: now };
+    wheel.last = now; if (wheel.done) wheel.low = Math.min(wheel.low, m);
+    if (wheel.done) return;
+    wheel.x += dx; wheel.y += dy;
+    var x = wheel.x, y = wheel.y, sw = null;
+    if (Math.max(Math.abs(x), Math.abs(y)) < 40) return;
+    // Natural scrolling: fingers up scroll the page down (deltaY > 0).
+    if (Math.abs(y) >= 1.5 * Math.abs(x)) sw = y > 0 ? 'up' : 'down';
+    else if (Math.abs(x) >= 1.5 * Math.abs(y)) sw = x > 0 ? 'left' : 'right';
+    wheel.done = true; wheel.low = m;
+    if (!sw) { swipes = []; return; }
+    place(); audio(); loadFaces();
+    var p = toStage(e), d = Math.hypot(x, y);
+    touch = { start: now, sx: p[0], sy: p[1], point: units(p), dir: [-x / d, -y / d], swiping: true, released: now, tx: 0, ty: 0 };
+    tick();
+    addSwipe(sw, now);
+  }, { passive: false });
   hit.addEventListener('pointercancel', lifted);
   function smear(now) {
     if (!touch) return null;

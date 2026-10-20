@@ -394,6 +394,14 @@ var EGG_LOGO={"crust":"M301.5,1651 C260.5,1650.1,243,1647.8,223.3,1640.9 C188.4,
     if (keySwipes.map(function (k) { return k[0]; }).join() === CODE.join()) { keySwipes = []; place(); audio(); loadFaces(); startEgg(); }
   });
   window.addEventListener('resize', function () { if (playing !== null) place(); });
+  // Sound on iPhone (like Pattern Pirate): a swipe doesn't count as permission to play sound, a tap does.
+  // So the first tap or key anywhere on the page quietly unlocks it (a silent blip), and the egg can play it later.
+  function unlock() {
+    audio();
+    if (!ac) return;
+    try { var b = ac.createBuffer(1, 1, 22050), s0 = ac.createBufferSource(); s0.buffer = b; s0.connect(ac.destination); s0.start(0); } catch (x) {}
+  }
+  ['touchend', 'pointerup', 'click', 'keydown'].forEach(function (ev) { document.addEventListener(ev, unlock, { passive: true, capture: true }); });
   // Test hook, only with ?eggtest in the link: draw one exact moment.
   if (location.search.indexOf('eggtest') >= 0) window.__eggFrame = function () { frame(); cancelAnimationFrame(raf); };
 })();

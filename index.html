@@ -518,7 +518,7 @@ $$('.start,.play,.next,#mbtn,.tb').forEach(function(el){var p=(el.classList.cont
 (function(){var cur='intro';seg('#mseg',function(b){cur=b.dataset.m;$$('[data-mv]').forEach(function(v){v.hidden=v.dataset.mv!==cur;});});
 ($('#play')||document.createElement('i')).addEventListener('click',function(){var el=$(cur==='intro'?'#ph-intro':'#ph-mc');el.getAnimations({subtree:true}).forEach(function(a){a.currentTime=0;});});})();
 </script>
-<script src="egg/egg.js?v=7" defer></script>
+<script src="egg/egg.js?v=8" defer></script>
 <script>// Chapter titles written in peanut butter, like the PB in the logo: fat squished letters, a darker edge,
 // a lighter middle, a shine on top, and drips running off the bottoms of the letters onto the toast.
 (function(){

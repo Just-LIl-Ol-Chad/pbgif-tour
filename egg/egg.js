@@ -137,8 +137,9 @@ var EGG_LOGO={"crust":"M301.5,1651 C260.5,1650.1,243,1647.8,223.3,1640.9 C188.4,
     stageEl.appendChild(d);
     return d;
   }
-  var knife = handDiv(document.querySelector('#ph-intro .ipbk'));
-  var jellyKnife = handDiv(document.querySelector('#ph-intro .igfk'));
+  // the knives come from the opening's intro (chapter 5 of the tour)
+  var knife = handDiv(document.querySelector('#ph-intro .ipbk, #ph-intro-open .ipbk'));
+  var jellyKnife = handDiv(document.querySelector('#ph-intro .igfk, #ph-intro-open .igfk'));
   var slapHand = handDiv(document.querySelector('#ph-mc .mchp'));
   // Like Pattern Pirate's #endLogo: a finger on the slice holds the page still.
   lg.style.touchAction = 'none';
@@ -170,7 +171,8 @@ var EGG_LOGO={"crust":"M301.5,1651 C260.5,1650.1,243,1647.8,223.3,1640.9 C188.4,
   var others = [];
   function startSounds(reduced) {
     stopSounds();
-    if (!ac) return;
+    // only when the sound is awake right now: sounds that wait for a later tap would come in late
+    if (!ac || ac.state !== 'running') return;
     var at = ac.currentTime + 0.02; humT0 = at;
     humSrc = play('hum', at, true);
     if (reduced) return;
@@ -306,9 +308,21 @@ var EGG_LOGO={"crust":"M301.5,1651 C260.5,1650.1,243,1647.8,223.3,1640.9 C188.4,
     reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     place(); sizeCanvas();
     mixed = copyLogo(); mixTicks = 0;
-    playing = performance.now() / 1000;
-    startSounds(reduced);
-    tick();
+    // The picture and the sound start together: if the sound is still waking up, wait for it, but not long.
+    var started = false;
+    function go() { if (started || document.hidden) return; started = true; playing = performance.now() / 1000; startSounds(reduced); tick(); }
+    if (ac && ac.state !== 'running' && ac.resume) { ac.resume().then(go, go); setTimeout(go, 400); } else go();
+  }
+  // Where the show is, in seconds. With sound, it follows what you hear (the sound clock, minus the speaker's
+  // delay), so the hum, the ding on the wink and the crunch on each bite land on the picture.
+  function showTime(now) {
+    if (ac && humSrc && ac.state === 'running') {
+      var ts = ac.getOutputTimestamp && ac.getOutputTimestamp(), heard;
+      if (ts && ts.contextTime > 0 && ts.performanceTime > 0) heard = ts.contextTime + (performance.now() - ts.performanceTime) / 1000;
+      else heard = ac.currentTime - (ac.outputLatency || ac.baseLatency || 0);
+      return Math.max(0, heard - humT0);
+    }
+    return now - playing;
   }
   function mixedLogo(t) {
     var total = Math.floor((t - mixAt) * 30);
@@ -335,7 +349,7 @@ var EGG_LOGO={"crust":"M301.5,1651 C260.5,1650.1,243,1647.8,223.3,1640.9 C188.4,
       showIntroLogo(false); clear(g); drawLogo(g, p);
       tick(); return;
     }
-    var t = now - playing;
+    var t = showTime(now);
     hideHands();
     if (reduced) {
       showIntroLogo(false); clear(g); drawLogo(g, base.pts);
@@ -439,6 +453,15 @@ var EGG_LOGO={"crust":"M301.5,1651 C260.5,1650.1,243,1647.8,223.3,1640.9 C188.4,
     if (keySwipes.map(function (k) { return k[0]; }).join() === CODE.join()) { keySwipes = []; place(); audio(); loadFaces(); startEgg(); }
   });
   window.addEventListener('resize', function () { if (playing !== null) place(); });
+  // Leaving the page (another app, another tab, the phone locked) ends the show and its music right away.
+  function leave() {
+    stopSounds();
+    if (playing === null) return;
+    cancelAnimationFrame(raf); hideHands(); showIntroLogo(true);
+    playing = null; touch = null;
+  }
+  document.addEventListener('visibilitychange', function () { if (document.hidden) leave(); });
+  window.addEventListener('pagehide', leave);
   // Sound on iPhone (like Pattern Pirate): a swipe doesn't count as permission to play sound, a tap does.
   // So the first tap or key anywhere on the page quietly unlocks it (a silent blip), and the egg can play it later.
   function unlock() {

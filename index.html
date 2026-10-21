@@ -518,16 +518,20 @@ $$('.start,.play,.next,#mbtn,.tb').forEach(function(el){var p=(el.classList.cont
 (function(){var cur='intro';seg('#mseg',function(b){cur=b.dataset.m;$$('[data-mv]').forEach(function(v){v.hidden=v.dataset.mv!==cur;});});
 ($('#play')||document.createElement('i')).addEventListener('click',function(){var el=$(cur==='intro'?'#ph-intro':'#ph-mc');el.getAnimations({subtree:true}).forEach(function(a){a.currentTime=0;});});})();
 </script>
-<script src="egg/egg.js?v=6" defer></script>
+<script src="egg/egg.js?v=7" defer></script>
 <script>// Chapter titles written in peanut butter, like the PB in the logo: fat squished letters, a darker edge,
 // a lighter middle, a shine on top, and drips running off the bottoms of the letters onto the toast.
 (function(){
   var DARK='#8E5622',BODY='#B5712D',LIGHT='#D29440',SHINE='#F7E6C3',n=0;
-  function rnd(a,b){return a+Math.random()*(b-a);}
+  // each title keeps the same drips until the page is reloaded: its random numbers come from a seed picked once
+  var R=Math.random;
+  function seeded(s){return function(){s=s+0x6D2B79F5|0;var q=Math.imul(s^s>>>15,1|s);q=q+Math.imul(q^q>>>7,61|q)^q;return((q^q>>>14)>>>0)/4294967296;};}
+  function rnd(a,b){return a+R()*(b-a);}
   // a drip: round on top and round on the bottom, never a corner
   function cap(x,y,r,L){ L=Math.max(L,0.1); return 'M'+(x-r)+','+y+' A'+r+','+r+' 0 0 1 '+(x+r)+','+y+' L'+(x+r)+','+(y+L)+' A'+r+','+r+' 0 0 1 '+(x-r)+','+(y+L)+'Z'; }
   function make(el){
     var t=el.dataset.t||el.textContent; el.dataset.t=t; n++;
+    if(!el.dataset.seed) el.dataset.seed=Math.floor(Math.random()*1e9); R=seeded(+el.dataset.seed);
     var fs=Math.min(44,Math.max(34,(el.parentNode.clientWidth||320)*0.12)), fat=fs*0.13, font='700 '+fs+'px Fredoka', ls=fs*0.01;
     var c=document.createElement('canvas'), g=c.getContext('2d'); g.font=font;
     var adv=function(ch){return g.measureText(ch).width*(ch===' '?1.5:1)+ls;};var tw=0,i; for(i=0;i<t.length;i++) tw+=adv(t[i]); tw-=ls;
@@ -539,7 +543,7 @@ $$('.start,.play,.next,#mbtn,.tb').forEach(function(el){var p=(el.classList.cont
     for(cx=0;cx<W;cx++){ var y=-1; for(cy=H-1;cy>=0;cy--) if(d[(cy*W+cx)*4+3]>128){y=cy;break;} low.push(y); }
     // drip spots: the bottoms of the letters (the lowest point of each bump along the bottom edge)
     var cand=[]; for(cx=6;cx<W-6;cx++){ var y0=low[cx]; if(y0<base-fs*0.1) continue; if(y0>=low[cx-3]&&y0>=low[cx+3]&&y0>=low[cx-6]&&y0>=low[cx+6]) cand.push(cx); }
-    cand.sort(function(){return Math.random()-.5;});
+    cand.sort(function(){return R()-.5;});
     var want=Math.max(3,Math.min(5,Math.round(W/70))), picks=[];
     cand.forEach(function(cx){ if(picks.length<want && picks.every(function(p){return Math.abs(p-cx)>26;})) picks.push(cx); });
     var drips=picks.map(function(cx){ var by=low[cx]-fat*0.6, r=rnd(fs*0.09,fs*0.15), L=rnd(fs*0.35,fs*0.95);
@@ -568,7 +572,7 @@ $$('.start,.play,.next,#mbtn,.tb').forEach(function(el){var p=(el.classList.cont
       // only a little: the groove fills just around where it landed (round ends, no corners), a small pool on top,
       // and one short drip onto the front of the letter. Nothing runs to the bottom.
       var zone='<ellipse cx="'+hit+'" cy="'+tp+'" rx="'+(cw*0.55)+'" ry="'+(fs*0.32)+'"/>';
-      var drp=(Math.random()<0.7?cap(hit+rnd(-1.5,1.5),tp-fs*0.02,fs*0.06,fs*rnd(0.16,0.24))+'"/><path d="':'')+' M'+(hit-fs*0.17)+','+(tp+fat*0.05)+' a'+(fs*0.17)+','+(fs*0.085)+' 0 1 0 '+(fs*0.34)+',0 a'+(fs*0.17)+','+(fs*0.085)+' 0 1 0 '+(-fs*0.34)+',0Z';
+      var drp=(R()<0.7?cap(hit+rnd(-1.5,1.5),tp-fs*0.02,fs*0.06,fs*rnd(0.16,0.24))+'"/><path d="':'')+' M'+(hit-fs*0.17)+','+(tp+fat*0.05)+' a'+(fs*0.17)+','+(fs*0.085)+' 0 1 0 '+(fs*0.34)+',0 a'+(fs*0.17)+','+(fs*0.085)+' 0 1 0 '+(-fs*0.34)+',0Z';
       var soft='<filter id="'+id+'r" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="'+(fs*0.03).toFixed(2)+'"/><feComponentTransfer><feFuncA type="linear" slope="6" intercept="-2.5"/></feComponentTransfer></filter>';
       jelly=groove+soft+
         '<g fill="#4F2178" transform="translate(0 2)" opacity=".5"><g filter="url(#'+id+'r)"><g mask="url(#'+id+'m)">'+zone+'</g><path d="'+drp+'"/></g></g>'+
@@ -602,7 +606,9 @@ $$('.start,.play,.next,#mbtn,.tb').forEach(function(el){var p=(el.classList.cont
     });
   }
   function all(){ document.querySelectorAll('.ctitle').forEach(make); land(); }
-  window.addEventListener('resize',function(){ clearTimeout(window.__pbt); window.__pbt=setTimeout(all,200); });
+  // only redraw when the width changes: on a phone, scrolling shows and hides the browser bar, which changes just the height
+  var lastW=window.innerWidth;
+  window.addEventListener('resize',function(){ if(window.innerWidth===lastW) return; lastW=window.innerWidth; clearTimeout(window.__pbt); window.__pbt=setTimeout(all,200); });
   (document.fonts&&document.fonts.load?document.fonts.load('700 40px Fredoka'):Promise.resolve()).then(all,all);
 })();
 </script>
